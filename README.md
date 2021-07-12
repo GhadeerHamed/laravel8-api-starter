@@ -43,6 +43,6 @@ php artisan serve
 
 And navigate to generated server link (http://127.0.0.1:8000)
 
-### OCTOPUS
+### Ghadeer
 
 ...
