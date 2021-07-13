@@ -19,7 +19,7 @@ trait Responsable
         ]);
     }
 
-    public function respondError($message, $validationError = null): JsonResponse
+    public function respondError($message, $validationError = null, $code = 400): JsonResponse
     {
         return response()->json([
             'result' => 'error',
@@ -28,7 +28,7 @@ trait Responsable
             'error_validation' => $validationError,
             'error_code' => 1,
             'date' =>date('Y-m-d')
-        ],400);
+        ],$code);
     }
 
     public function respondOut($message): JsonResponse

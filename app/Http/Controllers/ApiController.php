@@ -25,30 +25,9 @@ class ApiController extends BaseController
         ];
     }
 
-    public function getUser(Request $request)
+    public function getUser() : User
     {
-        if ($userId = $request->get('user_id')){
-            return User::find($userId);
-        }
-        elseif (auth('client')->check())
-            return User::find(auth('client')->id());
-        else
-            return null;
+        return User::query()->find(auth('api')->id());
     }
 
-    public function likedByUser($items, $user){
-        return $items->map(function($item) use ($user){
-            $item->liked_by = $item->isLikedBy($user);
-            return $item;
-        });
-    }
-
-    public function likedReviewByUser($items, $user){
-        return $items->map(function($cartItem) use ($user){
-            $item = $cartItem->product;
-            $item->liked_by = $item->isLikedBy($user);
-            $item->review_by = $item->isReviewBy($user);
-            return $cartItem;
-        });
-    }
 }

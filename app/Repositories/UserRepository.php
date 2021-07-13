@@ -118,4 +118,14 @@ class UserRepository
         return $admins;
     }
 
+    public function getById(?int $id): User
+    {
+        return User::query()->find($id);
+    }
+
+    public function getUserByEmail($email)
+    {
+        return (new User)->whereEmail($email)->first();
+    }
+
 }

@@ -11,14 +11,15 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Laravel\Socialite\Facades\Socialite;
 
-class AuthController extends ApiController {
+class SocialAuthController extends ApiController {
 
 
     public function socialLogin($provider, SocialLoginRequest $request): JsonResponse
     {
 
-        if(!$this->checkProviderAvailability($provider))
+        if(!$this->checkProviderAvailability($provider)) {
             return $this->respondError('no provider like this.');
+        }
 
         try {
             $client = Socialite::driver($provider)->userFromToken($request->get('access_token'));

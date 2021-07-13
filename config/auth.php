@@ -42,7 +42,7 @@ return [
         ],
 
         'api' => [
-            'driver' => 'session',
+            'driver' => 'passport',
             'provider' => 'users',
             'hash' => false,
         ],
@@ -113,5 +113,12 @@ return [
     */
 
     'password_timeout' => 10800,
+
+
+    'proxy' => [
+        'client_id' => env('PASSWORD_CLIENT_ID'),
+        'client_secret' => env('PASSWORD_CLIENT_SECRET'),
+        'grant_type' => env('PROXY_OAUTH_GRANT_TYPE'),
+    ],
 
 ];

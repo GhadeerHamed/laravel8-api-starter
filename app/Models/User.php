@@ -5,12 +5,13 @@ namespace App\Models;
 use App\Mail\VerifyMail;
 use Carbon\Carbon;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
-use Laravel\Sanctum\HasApiTokens;
+use Laravel\Passport\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 
 /**
@@ -21,10 +22,12 @@ use Spatie\Permission\Traits\HasRoles;
  * @property string $email
  * @property string $avatar
  * @property string $phone_number
- * @property string $token
  * @property string $password
  * @property string $code
  * @property Carbon $email_verified_at
+ *
+ * @method Builder whereId($value)
+ * @method Builder whereEmail($value)
  */
 class User extends Authenticatable implements MustVerifyEmail
 {

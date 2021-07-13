@@ -23,9 +23,8 @@ class ResetPasswordRequest extends FormRequest
      */
     public function rules(): array
     {
-        return $this->method() === 'POST' ?
+        return $this->method() === 'PUT' ?
             [
-                'email' => 'required|email',
                 'old_password' => 'required',
                 'new_password' => 'required|confirmed|min:6',
             ] : [];
