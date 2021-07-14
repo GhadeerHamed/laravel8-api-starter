@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Api\Auth\ResetPasswordController;
+use App\Http\Controllers\FbController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -15,7 +17,15 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('home');
 });
 
 Route::get('password/reset/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
+
+Auth::routes();
+
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+Route::get('auth/facebook', [FbController::class, 'redirectToFacebook']);
+
+Route::get('callback/facebook', [FbController::class, 'facebookSignin']);

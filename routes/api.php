@@ -31,7 +31,7 @@ Route::group(['as' => 'api.'], function () {
     Route::post('auth/social/{provider}', [SocialAuthController::class, 'socialLogin']);
 
     Route::group(['middleware' => 'auth:api'], function () {
-        Route::put('profile/update', [UserController::class, 'profileUpdate'])->name('password.change');
+        Route::put('profile/update', [UserController::class, 'profileUpdate'])->name('profile.update');
         Route::put('password/update', [UserController::class, 'updatePassword'])->name('password.change');
     });
 });

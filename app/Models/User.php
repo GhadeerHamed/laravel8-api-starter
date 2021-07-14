@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Mail\VerifyMail;
+use App\Mail\ResetMail;
 use Carbon\Carbon;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Builder;
@@ -50,6 +50,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'phone_number',
         'avatar',
         'code',
+        'facebook_id'
     ];
 
 
@@ -85,7 +86,7 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         $email = $this->email;
         //send email here
-        $token = random_int( 100000 , 999999 );
+        $token = random_int(100000, 999999);
         $data = ['name' => $this->name, 'verification_code' => $token];
 
 //        // Send Email
@@ -96,6 +97,17 @@ class User extends Authenticatable implements MustVerifyEmail
         $this->code = $token;
         $this->email_verified_at = null;
         return $this;
+    }
+
+    /**
+     * @throws \ReflectionException
+     */
+    public function sendPasswordResetNotification($token): void
+    {
+        $data = ['name' => $this->name, 'token' => $token];
+        Mail::to([
+            'email' => $this->email
+        ])->send(new ResetMail($data));
     }
 
 //    public function toggleNotificationStatus(): User
