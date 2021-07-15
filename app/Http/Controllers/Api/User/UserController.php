@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\User;
 
+use App\Events\AuthEvent;
 use App\Http\Controllers\ApiController;
 use App\Http\Requests\API\UpdateTokenRequest;
 use App\Http\Requests\API\ResetPasswordConfirmRequest;
@@ -30,31 +31,13 @@ class UserController extends ApiController
         } catch (\Exception $e) {
             return $this->respondError($e->getMessage());
         }
+        event((new AuthEvent($user, AuthEvent::ACTION_REGISTER, [])));
 
         try {
             return $this->requestPasswordGrant($request, $user);
         } catch (JsonException $e) {
             return $this->respondError($e->getMessage());
         }
-    }
-
-    public function login(UpdateTokenRequest $request): JsonResponse
-    {
-        $credentials = $request->only('email', 'password');
-        if (auth('api')->attempt($credentials)) {
-            $user = User::whereId(auth('api')->id())->first();
-
-            if (!$user->token) {
-                $token = $user->createToken('API');
-                $user->token = $token->plainTextToken;
-                $user->save();
-            }
-            return $this->respondSuccess([
-                'token' => $user->token,
-                'user' => $user
-            ]);
-        }
-        return $this->respondError(__('api.username_or_password_invalid'));
     }
 
     public function updatePassword(ResetPasswordRequest $request): JsonResponse

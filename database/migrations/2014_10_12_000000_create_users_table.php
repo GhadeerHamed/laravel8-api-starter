@@ -18,13 +18,12 @@ class CreateUsersTable extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->nullable();
-            $table->string('password');
-            $table->string('phone_number');
+            $table->string('password')->nullable();
+            $table->string('phone_number')->nullable();
             $table->text('avatar')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->boolean('app_notification_status')->default(true);
             $table->string('code')->nullable();
-            $table->string('facebook_id')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\AuthEvent;
 use App\Http\Traits\Responsable;
 use App\Models\User;
 use App\Proxy\HttpKernelProxy;
@@ -34,13 +35,13 @@ class ApiController extends BaseController
      *
      * @var HttpKernelProxy
      */
-    protected HttpKernelProxy $proxy;
+    protected $proxy;
 
 
     /**
      * @var UserRepository
      */
-    protected UserRepository $userRepository;
+    protected $userRepository;
     /**
      * LoginController constructor.
      *
@@ -86,6 +87,7 @@ class ApiController extends BaseController
             'scopes' => '[*]'
         ]);
         if ($response->isSuccessful()) {
+            event((new AuthEvent($user, AuthEvent::ACTION_LOGIN, [])));
             return $this->sendSuccessResponse($response, $user);
         }
 

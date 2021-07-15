@@ -2,48 +2,52 @@
 
 namespace App\Http\Controllers\Api\User;
 
-use App\Classes\FacebookClient;
-use App\Classes\GoogleClient;
+use App\Events\AuthEvent;
 use App\Http\Controllers\ApiController;
 use App\Http\Requests\API\SocialLoginRequest;
+use App\Models\SocialAccount;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Laravel\Socialite\Facades\Socialite;
 
-class SocialAuthController extends ApiController {
+class SocialAuthController extends ApiController
+{
 
-
-    public function socialLogin($provider, SocialLoginRequest $request): JsonResponse
+    public function socialLogin(SocialLoginRequest $request, $provider): JsonResponse
     {
 
-        if(!$this->checkProviderAvailability($provider)) {
+        if (!$this->checkProviderAvailability($provider)) {
             return $this->respondError('no provider like this.');
         }
 
         try {
-            $client = Socialite::driver($provider)->userFromToken($request->get('access_token'));
-        } catch(\Exception $error) {
+            $provider_user = Socialite::driver($provider)->userFromToken($request->get('access_token'));
+        } catch (\Exception $error) {
             return $this->respondError($error->getMessage());
         }
 
-        $existingClient = $this->getExistingClient($client->email, $provider);
+        $user = $this->getExistingUser($provider_user->getId(), $provider);
 
-        if ($existingClient){
-            $token = $existingClient->createToken('API');
+        if (!$user) {
+            $user = $this->userRepository->getUserByEmail($provider_user->email);
+            if (!$user) {
+                $user = $this->makeNewUser($provider_user);
+            }
 
-            return $this->respondSuccess([
-                'client' => $existingClient,
-                'token' => $token->plainTextToken
+            $user->social_accounts()->create([
+                'provider' => $provider,
+                'provider_user_id' => $provider_user->getId()
             ]);
         }
 
-        $client = $this->makeNewSocialClient($client, $provider);
-        $token = $client->createToken('API');
+        event(new AuthEvent($user, AuthEvent::ACTION_SOCIAL_LOGIN, ["Provider" => $provider]));
 
+        $token = $user->createToken('API');
         return $this->respondSuccess([
-            'client' => $client,
-            'token' => $token->plainTextToken
+            'access_token' => $token->accessToken,
+            'expires_in' => $token->token->expires_at,
+            'refresh_token' => null,
+            'user' => $user,
         ]);
     }
 
@@ -52,28 +56,27 @@ class SocialAuthController extends ApiController {
         return in_array($provider, ['facebook', 'google']);
     }
 
-    private function getExistingClient($email, $provider)
+    /**
+     * @param $provider_id
+     * @param $provider
+     * @return User|null
+     */
+    private function getExistingUser($provider_id, $provider): ?User
     {
-        return User::query()->where([
-            ['email', $email],
-            ['provider', $provider]
-        ])->first();
+        $social_account = SocialAccount::query()
+            ->where('provider', $provider)
+            ->where('provider_user_id', $provider_id)
+            ->first();
+
+        return $social_account->user ?? null;
     }
 
-    private function makeNewSocialClient($client, $provider) : User
+    private function makeNewUser($social_provider): User
     {
-        switch ($provider)
-        {
-            case User::FACEBOOK_PROVIDER:
-                $client = new FacebookClient($client);
-                break;
-            case User::GOOGLE_PROVIDER:
-                $client = new GoogleClient($client);
-                break;
-        }
-        $newClient = $client->makeClient();
-        $newClient->save();
-
-        return $newClient;
+        return User::create([
+            'name' => $social_provider->getName(),
+            'avatar' => $social_provider->getAvatar(),
+            'email' => $social_provider->getEmail()
+        ]);
     }
 }

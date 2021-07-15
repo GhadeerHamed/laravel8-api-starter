@@ -32,7 +32,7 @@ class GoogleClient implements SocialClient
 
     }
 
-    function makeClient()
+    public function makeClient()
     {
         return User::query()->make([
             'first_name' => $this->getFirstName(),

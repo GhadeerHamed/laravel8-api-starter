@@ -8,7 +8,7 @@
     ],
     "license": "MIT",
     "require": {
-        "php": "7.4",
+        "php": "^7.3|^8.0",
         "ext-curl": "*",
         "ext-json": "*",
         "arcanedev/log-viewer": "^8.1",
@@ -20,6 +20,7 @@
         "laravel/socialite": "^5.2",
         "laravel/tinker": "^2.5",
         "laravel/ui": "^3.3",
+        "spatie/laravel-activitylog": "^3.17",
         "spatie/laravel-image-optimizer": "^1.6",
         "spatie/laravel-permission": "^4.0"
     },

@@ -30,7 +30,7 @@ Route::group(['as' => 'api.'], function () {
         Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
         Route::post('password/reset', [ResetPasswordController::class, 'reset'])->name('password.reset.post');
         Route::post('logout', [AccessTokensController::class, 'destroy'])->name('logout')->middleware(["auth:api"]);
-        Route::post('auth/social/{provider}', [SocialAuthController::class, 'social_login']);
+        Route::post('auth/social/{provider}', [SocialAuthController::class, 'socialLogin'])->name('social_login');
     });
 
 

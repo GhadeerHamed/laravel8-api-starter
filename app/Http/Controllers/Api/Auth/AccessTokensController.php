@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Auth;
 
 
+use App\Events\AuthEvent;
 use App\Http\Controllers\ApiController;
 use App\Http\Requests\API\LoginUserRequest;
 use App\Http\Requests\API\UpdateTokenRequest;
@@ -102,8 +103,9 @@ class AccessTokensController extends ApiController
      */
     public function destroy(): JsonResponse
     {
-        $this->userRepository->getById(Auth::id())->tokens()->delete();
-
+        $user = $this->userRepository->getById(Auth::id());
+        $user->tokens()->delete();
+        event((new AuthEvent($user, AuthEvent::ACTION_LOGOUT, [])));
         return $this->respondMessage("Logged out");
     }
 }

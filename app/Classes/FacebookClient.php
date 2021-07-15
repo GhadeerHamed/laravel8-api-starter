@@ -16,7 +16,7 @@ class FacebookClient implements SocialClient
         $this->client = $client->user;
     }
 
-    function makeClient()
+    public function makeClient()
     {
         return User::query()->make([
             'first_name' => $this->getFirstName(),

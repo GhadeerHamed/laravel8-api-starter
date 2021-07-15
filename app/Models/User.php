@@ -7,17 +7,20 @@ use Carbon\Carbon;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Laravel\Passport\HasApiTokens;
+use phpseclib3\Math\BigInteger;
 use Spatie\Permission\Traits\HasRoles;
 
 /**
  * Class User
  * @package App\Models
  *
+ * @property BigInteger $id
  * @property string $name
  * @property string $email
  * @property string $avatar
@@ -28,6 +31,7 @@ use Spatie\Permission\Traits\HasRoles;
  *
  * @method Builder whereId($value)
  * @method Builder whereEmail($value)
+ * @property-read  SocialAccount[] $social_accounts
  */
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -35,8 +39,6 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public const FACEBOOK_PROVIDER = 'facebook';
     public const GOOGLE_PROVIDER = 'google';
-
-    public array $translatedAttributes = [];
 
     /**
      * The attributes that are mass assignable.
@@ -49,8 +51,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'password',
         'phone_number',
         'avatar',
-        'code',
-        'facebook_id'
+        'code'
     ];
 
 
@@ -99,8 +100,9 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this;
     }
 
+
     /**
-     * @throws \ReflectionException
+     * @param string $token
      */
     public function sendPasswordResetNotification($token): void
     {
@@ -110,21 +112,12 @@ class User extends Authenticatable implements MustVerifyEmail
         ])->send(new ResetMail($data));
     }
 
-//    public function toggleNotificationStatus(): User
-//    {
-//        $oldStatus = $this->app_notification_status;
-//        $newStatus = $oldStatus ==  "yes" ? "no" : "yes";
-//        $this->app_notification_status = $newStatus;
-//        return $this;
-//    }
+    /**
+     * @return HasMany
+     */
+    public function social_accounts(): HasMany
+    {
+        return $this->hasMany(SocialAccount::class);
+    }
 
-//    public function sendNotification($title,$body)
-//    {
-//        $userNotification = Notification::create([
-//            'title:en' =>$title,
-//            'message:en' => $body,
-//            'user_id' => $this->id
-//        ]);
-//        $this->userNotifications()->save($userNotification);
-//    }
 }
