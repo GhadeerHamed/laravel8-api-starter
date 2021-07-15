@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api\User;
 
 use App\Http\Controllers\ApiController;
-use App\Http\Requests\API\LoginUserRequest;
+use App\Http\Requests\API\UpdateTokenRequest;
 use App\Http\Requests\API\ResetPasswordConfirmRequest;
 use App\Http\Requests\API\ResetPasswordRequest;
 use App\Http\Requests\API\UpdateUserRequest;
@@ -17,15 +17,10 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpFoundation\Exception\JsonException;
 
 class UserController extends ApiController
 {
-    private UserRepository $userRepository;
-
-    public function __construct(UserRepository $userRepository)
-    {
-        $this->userRepository = $userRepository;
-    }
 
     public function register(UserRequest $request): JsonResponse
     {
@@ -33,23 +28,17 @@ class UserController extends ApiController
         try {
             $user->generateActivationCode()->save();
         } catch (\Exception $e) {
+            return $this->respondError($e->getMessage());
         }
 
-        if (!$user->token) {
-            $token = $user->createToken('API');
-            $user->token = $token->plainTextToken;
-            $user->save();
+        try {
+            return $this->requestPasswordGrant($request, $user);
+        } catch (JsonException $e) {
+            return $this->respondError($e->getMessage());
         }
-
-        return $this->respondSuccess(
-            [
-                'token' => $user->token,
-                'user' => $user
-            ]
-        );
     }
 
-    public function login(LoginUserRequest $request): JsonResponse
+    public function login(UpdateTokenRequest $request): JsonResponse
     {
         $credentials = $request->only('email', 'password');
         if (auth('api')->attempt($credentials)) {

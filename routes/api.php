@@ -23,12 +23,16 @@ Route::group(['as' => 'api.'], function () {
     })->name('profile');
 
     //AUTH && FCM GROUP
-    Route::post('register', [UserController::class, 'register'])->name('register');
-    Route::post('login', [AccessTokensController::class, 'store'])->name('login');
-    Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
-    Route::post('password/reset', [ResetPasswordController::class, 'reset'])->name('password.reset.post');
-    Route::post('logout', [AccessTokensController::class, 'destroy'])->name('logout');
-    Route::post('auth/social/{provider}', [SocialAuthController::class, 'socialLogin']);
+    Route::group(['as' => 'auth.'], function () {
+        Route::post('register', [UserController::class, 'register'])->name('register');
+        Route::post('login', [AccessTokensController::class, 'store'])->name('login');
+        Route::post('update_token', [AccessTokensController::class, 'update'])->name('update_token');
+        Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+        Route::post('password/reset', [ResetPasswordController::class, 'reset'])->name('password.reset.post');
+        Route::post('logout', [AccessTokensController::class, 'destroy'])->name('logout')->middleware(["auth:api"]);
+        Route::post('auth/social/{provider}', [SocialAuthController::class, 'social_login']);
+    });
+
 
     Route::group(['middleware' => 'auth:api'], function () {
         Route::put('profile/update', [UserController::class, 'profileUpdate'])->name('profile.update');
