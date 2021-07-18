@@ -4,11 +4,15 @@ namespace App\Http\Controllers\Api\User;
 
 use App\Events\AuthEvent;
 use App\Http\Controllers\ApiController;
+use App\Http\Requests\Address\StoreAddressRequest;
+use App\Http\Requests\Address\UpdateAddressRequest;
 use App\Http\Requests\API\UpdateTokenRequest;
 use App\Http\Requests\API\ResetPasswordConfirmRequest;
 use App\Http\Requests\API\ResetPasswordRequest;
 use App\Http\Requests\API\UpdateUserRequest;
 use App\Http\Requests\UserRequest;
+use App\Http\Resources\AddressCollection;
+use App\Models\Address;
 use App\Models\User;
 use App\Repositories\UserRepository;
 use Illuminate\Http\JsonResponse;
@@ -112,6 +116,36 @@ class UserController extends ApiController
         return $this->respondSuccess([
             'user' => $user
         ]);
+    }
+
+    public function getAddresses(): JsonResponse
+    {
+        $user = Auth::user();
+        $addresses = $this->userRepository->getAddresses($user);
+
+        return $this->respondSuccess(new AddressCollection($addresses), $this->createApiPaginator($addresses));
+    }
+
+
+    public function storeAddress(StoreAddressRequest $request): JsonResponse
+    {
+        $user = Auth::user();
+        $address = $this->userRepository->storeAddress($user, $request->all());
+        return $this->respondSuccess($address);
+    }
+
+    public function updateAddress(UpdateAddressRequest $request, $id): JsonResponse
+    {
+        $user = Auth::user();
+        $address = $this->userRepository->updateAddress($user, $id, $request->all());
+        return $this->respondSuccess($address);
+    }
+
+    public function deleteAddress($id): JsonResponse
+    {
+        $user = Auth::user();
+        $address = $this->userRepository->deleteAddress($user, $id);
+        return $this->respondSuccess($address);
     }
 
 }

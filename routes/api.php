@@ -34,8 +34,13 @@ Route::group(['as' => 'api.'], function () {
     });
 
 
-    Route::group(['middleware' => 'auth:api'], function () {
+    Route::group(['middleware' => 'auth:api', 'as' => 'user.'], function () {
         Route::put('profile/update', [UserController::class, 'profileUpdate'])->name('profile.update');
         Route::put('password/update', [UserController::class, 'updatePassword'])->name('password.change');
+
+        Route::get('addresses', [UserController::class, 'getAddresses'])->name('addresses.list');
+        Route::post('addresses', [UserController::class, 'storeAddress'])->name('addresses.store');
+        Route::put('addresses/{id}', [UserController::class, 'updateAddress'])->name('addresses.update');
+        Route::delete('addresses/{id}', [UserController::class, 'deleteAddress'])->name('addresses.delete');
     });
 });

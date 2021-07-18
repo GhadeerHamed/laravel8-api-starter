@@ -32,6 +32,7 @@ use Spatie\Permission\Traits\HasRoles;
  * @method Builder whereId($value)
  * @method Builder whereEmail($value)
  * @property-read  SocialAccount[] $social_accounts
+ * @property-read  Address[] $addresses
  */
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -118,6 +119,11 @@ class User extends Authenticatable implements MustVerifyEmail
     public function social_accounts(): HasMany
     {
         return $this->hasMany(SocialAccount::class);
+    }
+
+    public function addresses(): HasMany
+    {
+        return $this->hasMany(Address::class);
     }
 
 }

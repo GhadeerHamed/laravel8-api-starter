@@ -2,12 +2,12 @@
 
 namespace App\Repositories;
 
+use App\Models\Address;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class UserRepository
@@ -57,12 +57,12 @@ class UserRepository
     {
         $users = User::query();
 
-        if ($request->has('status') && $request->get('status') !== null){
+        if ($request->has('status') && $request->get('status') !== null) {
             $users = $users->where('status', $request->get('status'));
         }
 
 
-        if ($search = $request->get('search')){
+        if ($search = $request->get('search')) {
             $tokens = convertToSeparatedTokens($search);
             $users->whereRaw("MATCH(name) AGAINST(? IN BOOLEAN MODE)", $tokens);
         }
@@ -77,7 +77,7 @@ class UserRepository
             ->get()->map(function ($result) {
                 return array(
                     'id' => $result->id,
-                    'text' => $result->name . ' ('.$result->email.')',
+                    'text' => $result->name . ' (' . $result->email . ')',
                 );
             });
     }
@@ -86,7 +86,7 @@ class UserRepository
     {
         $admins = User::query();
 
-        if ($request->has('query')){
+        if ($request->has('query')) {
             if (isset($request->get('query')['status']) !== null) {
                 $admins->where('status', $request->get('query')['status']);
             }
@@ -100,7 +100,7 @@ class UserRepository
             }
 
 
-            if (isset($request->get('query')['search']) !== null){
+            if (isset($request->get('query')['search']) !== null) {
                 $tokens = convertToSeparatedTokens($request->get('query')['search']);
                 $admins->whereRaw("MATCH(name, email, phone_number) AGAINST(? IN BOOLEAN MODE)", $tokens);
             }
@@ -109,8 +109,7 @@ class UserRepository
         if ($request->has('sort')) {
             $admins = $admins->orderBy($request->get('sort')['field'], $request->get('sort')['sort'] ?? 'asc')
                 ->paginate($request->get('pagination')['perpage'], ['*'], 'page', $request->get('pagination')['page']);
-        }
-        else {
+        } else {
             $admins = $admins->orderBy('id', 'desc')
                 ->paginate($request->get('pagination')['perpage'], ['*'], 'page', $request->get('pagination')['page']);
         }
@@ -126,6 +125,30 @@ class UserRepository
     public function getUserByEmail($email)
     {
         return (new User)->whereEmail($email)->first();
+    }
+
+    public function getAddresses(User $user): object
+    {
+        return $user->addresses()->paginate(5);
+    }
+
+    public function storeAddress(User $user, array $data): Address
+    {
+        return $user->addresses()->create($data);
+    }
+
+    public function updateAddress(User $user, int $id, array $data): Address
+    {
+        $address = $user->addresses()->findOrFail($id);
+        $address->update($data);
+        return $address->fresh();
+    }
+
+    public function deleteAddress(User $user, int $id): Address
+    {
+        $address = $user->addresses()->findOrFail($id);
+        $address->delete();
+        return $address;
     }
 
 }

@@ -60,6 +60,10 @@ class ApiController extends BaseController
             'limit' => $data->perPage(),
             'total_page' => ceil($data->total() / $data->perPage()),
             'current_page' => $data->currentPage(),
+            'previous_page' => $data->previousPageUrl(),
+            'next_page' => $data->nextPageUrl(),
+            'first_page' => $data->url(1),
+            'last_page' => $data->url($data->lastPage()),
         ];
     }
 
